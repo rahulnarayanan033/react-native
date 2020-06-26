@@ -7,17 +7,35 @@ import { View , Platform , Text , ScrollView , Image , StyleSheet } from 'react-
 import { createStackNavigator , createDrawerNavigator , DrawerItems , SafeAreaView } from 'react-navigation';
 import { Icon } from 'react-native-elements';
 import Home from './HomeComponent';
+import { connect } from 'react-redux';
+import { fetchComments , fetchDishes , fetchLeaders , fetchPromos } from '../redux/ActionCreators';
+
+const mapStateToProps = state => {
+    return{
+
+    }
+}
+
+const mapDispatchToProps = dispatch => ({
+    fetchDishes : () => dispatch(fetchDishes()),
+    fetchComments: () => dispatch(fetchComments()),
+    fetchPromos: () => dispatch(fetchPromos()),
+    fetchLeaders: () => dispatch(fetchLeaders()), 
+})
+
 
 const MenuNavigator = createStackNavigator({
-    Menu : { screen : Menu , 
+    Menu : { screen : () => <Menu/> , 
             navigationOptions : ({navigation}) => ({
-                headerLeft : <Icon name="menu" size={24} color='white' onPress={() => navigation.toggleDrawer()}/>
-            }) },
-    DishDetail : { screen : DishDetail }
+                headerLeft : <Icon name="menu" size={24} color='white' onPress={() => navigation.toggleDrawer()}/>,
+                title : 'Menu'
+            })  },
+    DishDetail : { screen : () => <DishDetail/> , navigationOptions : { title : 'Dish Detail' }}
 },
 {
     initialRouteName: 'Menu',
     navigationOptions: {
+
         headerStyle: {
             backgroundColor: "#512DA8"
         },
@@ -30,10 +48,11 @@ const MenuNavigator = createStackNavigator({
 );
 
 const HomeNavigator = createStackNavigator({
-    Home : { screen : Home }
+    Home : { screen : () => <Home/> }
 },
 {
     navigationOptions: ({navigation}) => ({
+        title : 'Home',
         headerStyle: {
             backgroundColor: "#512DA8"
         },
@@ -48,10 +67,11 @@ const HomeNavigator = createStackNavigator({
 );
 
 const AboutNavigator = createStackNavigator({
-    Contact : { screen : About }
+    Contact : { screen : () => <About/> }
 },
 {
     navigationOptions: ({navigation}) => ({
+        title : 'About',
         headerStyle: {
             backgroundColor: "#512DA8"
         },
@@ -151,6 +171,12 @@ const MainNavigator = createDrawerNavigator({
 
 
 class Main extends Component {
+    componentDidMount(){
+        this.props.fetchDishes();
+        this.props.fetchComments();
+        this.props.fetchPromos();
+        this.props.fetchLeaders();
+    }
     render(){
         return(
             <View style={{ flex : 1 , paddingTop : Platform.OS === 'ios' ? 0 : Expo.Constants.statusBarHeight }}>
@@ -183,4 +209,4 @@ const styles = StyleSheet.create({
       height: 60
     }
   });
-export default Main;
+export default connect(mapStateToProps , mapDispatchToProps)(Main);
