@@ -34,6 +34,7 @@ class Menu extends Component {
         };
 
         const { navigate } = this.props.navigation;
+        console.log({navigate})
         if(this.props.dishes.isLoading){
             return(
                 <Loading/>
