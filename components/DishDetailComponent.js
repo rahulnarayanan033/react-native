@@ -103,6 +103,7 @@ class PencilIcon extends Component {
 function RenderDish(props) {
     const dish = props.dish;
 
+    
     const recognizeDrag = ({ moveX , moveY , dx , dy }) => {
         if( dx < -200 ) {
             return true;
@@ -112,9 +113,15 @@ function RenderDish(props) {
         }
     };
 
+    const handleViewRef = ref => view = ref;
+
      const panResponder = PanResponder.create({
          onStartShouldSetPanResponder : (e , gesturState) => {
              return true;
+         },
+         onPanResponderGrant : () => {
+             view.rubberBand(1000)
+                .then(endState => console.log(endState.finished ? 'finished' : 'cancelled'));
          },
          onPanResponderEnd : (e , gesturState) => {
             console.log('pan responderend ' + gesturState );
@@ -142,7 +149,9 @@ function RenderDish(props) {
 
     if(dish != null ) {
         return(
-            <Animatable.View animation='fadeInDown' duration={2000} delay={1000} {...panResponder.panHandlers}>
+            <Animatable.View animation='fadeInDown' duration={2000} delay={1000}
+             ref={handleViewRef}
+             {...panResponder.panHandlers}>
                 <Card featuredTitle={dish.name}image={{ uri : baseUrl + dish.image }}>
                     <Text style={{margin : 10}}>
                         {dish.description}
