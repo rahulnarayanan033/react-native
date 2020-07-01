@@ -1,5 +1,5 @@
 import React , { Component } from 'react';
-import { Text , View , ScrollView , FlatList , Modal , StyleSheet , Button , Alert } from 'react-native';
+import { Text , View , ScrollView , FlatList , Modal , StyleSheet , Button , Alert , PanResponder } from 'react-native';
 import { Card , Icon , Rating , Input , AirbnbRating } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -103,9 +103,46 @@ class PencilIcon extends Component {
 function RenderDish(props) {
     const dish = props.dish;
 
+    const recognizeDrag = ({ moveX , moveY , dx , dy }) => {
+        if( dx < -200 ) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+
+     const panResponder = PanResponder.create({
+         onStartShouldSetPanResponder : (e , gesturState) => {
+             return true;
+         },
+         onPanResponderEnd : (e , gesturState) => {
+            console.log('pan responderend ' + gesturState );
+            if(recognizeDrag(gesturState)) {
+                Alert.alert(
+                    'Add Favorite',
+                    'Are ou sure you want to add ' + dish.name + ' to favorite? ',
+                    [
+                        {
+                            text : 'Cancel',
+                            onPress : () => console.log('Cancel Pressed'),
+                            style : 'cancel'
+                        },
+                        {
+                            text : 'OK',
+                            onPress : () => { props.favorite ? console.log('Already favorite') : props.onPress() }
+                        }
+                    ],
+                    { cancelable : false }
+                );
+             }
+             return true;
+         }
+     })
+
     if(dish != null ) {
         return(
-            <Animatable.View animation='fadeInDown' duration={2000} delay={1000}>
+            <Animatable.View animation='fadeInDown' duration={2000} delay={1000} {...panResponder.panHandlers}>
                 <Card featuredTitle={dish.name}image={{ uri : baseUrl + dish.image }}>
                     <Text style={{margin : 10}}>
                         {dish.description}
