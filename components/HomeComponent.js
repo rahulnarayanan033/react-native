@@ -52,7 +52,6 @@ class Home extends Component {
     constructor(props){
         super(props);
         this.animatedValue = new Animated.Value(0);
-        console.log('con ' + this);
     }
 
     static navigationOptions = {
@@ -60,12 +59,10 @@ class Home extends Component {
     }
 
     componentDidMount(){
-        console.log('mount ' + this);
         this.animate()
     }
 
     animate(){
-        console.log('animate ' + this)
         this.animatedValue.setValue(0)
         Animated.timing(
             this.animatedValue,
