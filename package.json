@@ -2,6 +2,7 @@
   "dependencies": {
     "@react-navigation/stack": "^5.5.1",
     "expo": "37.0.11",
+    "expo-mail-composer": "~8.1.0",
     "expo-notifications": "~0.1.1",
     "expo-permissions": "~8.1.0",
     "expo-secure-store": "~8.1.0",
