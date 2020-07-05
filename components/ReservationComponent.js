@@ -5,6 +5,8 @@ import DatePicker from 'react-native-datepicker';
 import * as Animatable from 'react-native-animatable';
 import {Notifications} from 'expo';
 import * as Permissions from 'expo-permissions';
+import * as Calendar from 'expo-calendar';
+
 
 class Reservation extends Component {
     constructor(props){
@@ -36,6 +38,7 @@ class Reservation extends Component {
                     text : 'OK',
                     onPress : () => {
                         this.presentLocalNotification(this.state.date) ; 
+                        this.addReservationToCalendar(this.state.date);
                         this.resetForm()
                     }
                 }
@@ -52,9 +55,50 @@ class Reservation extends Component {
         });
     }
 
+    async getDefaultCalendarSource() {
+        const calendars = await Calendar.getCalendarsAsync();
+        const defaultCalendars = calendars.filter(calendar => calendar.source === 'Default');
+        return defaultCalendars[0].source;
+    }
+
+    async obtainCalendarPermission(){
+        let calendarPermission = await Permissions.getAsync(Permissions.CALENDAR);
+        if(calendarPermission.status !== 'granted'){
+            calendarPermission = await Permissions.askAsync(Permissions.CALENDAR);
+            if(calendarPermission !== 'granted'){
+                Alert.alert('No permission given');
+            }
+        }
+        return calendarPermission;
+    }
+
+    async addReservationToCalendar(date){
+        await this.obtainCalendarPermission();
+        const defaultCalendarSource = Platform.OS === 'ios' ? await this.getDefaultCalendarSource() : { isLocalAccount : true , name : 'Expo calendar' };
+        Calendar.createCalendarAsync({
+            title : 'Expo Calendar',
+            color : 'blue',
+            entityType : Calendar.EntityTypes.EVENT,
+            sourceId : defaultCalendarSource.id,
+            source : defaultCalendarSource,
+            name : 'Calendar Name',
+            ownerAccount : 'personal',
+            accessLevel : Calendar.CalendarAccessLevel.OWNER,
+        })
+        .then(id => {
+            Calendar.createEventAsync(id ,{
+                title : 'Con Fusion Reservation Table',
+                startDate : new Date(Date.parse(date)),
+                endDate : new Date(Date.parse(date)).setMilliseconds(2*60*60*1000),
+                timeZone : 'Asia/Hong_Kong',
+                location : '121, Clear Water Bay Road, Clear Water Bay, Kowloon, Hong Kong'
+            })
+        })
+
+    }
+
     async obtainNotificationPermission() {
         let permission = await Permissions.getAsync(Permissions.USER_FACING_NOTIFICATIONS);
-        console.log(permission);
         if(permission.status !== 'granted'){
             permission = await Permissions.askAsync(Permissions.USER_FACING_NOTIFICATIONS);
             if(permission.status !== 'granted'){
@@ -109,7 +153,7 @@ class Reservation extends Component {
                         <Text style={styles.formLabel}>Smoking/Non-Smoking</Text>
                         <Switch style={styles.formItem}
                                 value={this.state.smoking}
-                                onTintColor="#512DA8"
+                                trackColor="#512DA8"
                                 onValueChange={(value) => this.setState({smoking : value})}>
                         </Switch>
                     </View>
